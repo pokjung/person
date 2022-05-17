@@ -1,0 +1,35 @@
+PositionLevelID,GroupID,PositionLevelThName,PositionLevelEngName,Status
+1,2,,NULL,False
+2,2,สูง,NULL,True
+3,2,ต้น,NULL,True
+4,2,ทรงคุณวุฒิ,,True
+5,2,เชี่ยวชาญ,NULL,True
+6,2,ชำนาญการพิเศษ,NULL,True
+7,2,ชำนาญการ,NULL,True
+8,2,ปฏิบัติการ,NULL,True
+9,2,อาวุโส,NULL,True
+10,2,ชำนาญงาน,NULL,True
+11,2,ปฏิบัติงาน,NULL,True
+12,4,บ 1,NULL,True
+13,4,บ 2,NULL,True
+14,4,ส 1,NULL,True
+15,4,ส 2,NULL,True
+16,4,ส 2/หัวหน้า,NULL,True
+17,4,ส 3,NULL,True
+18,4,ส 3/หัวหน้า,NULL,True
+19,4,ส 4,NULL,True
+20,4,ส 4/หัวหน้า,NULL,True
+21,4,ช 1,NULL,True
+22,4,ช 2,NULL,True
+23,4,ช 2/หัวหน้า,NULL,True
+24,4,ช 3,NULL,True
+25,4,ช 3/หัวหน้า,NULL,True
+26,4,ช 4,NULL,True
+27,4,ช 4/หัวหน้า,NULL,True
+28,4,ท 1,NULL,True
+29,4,ท 2,NULL,True
+30,4,ท 2/หัวหน้า,NULL,True
+31,4,ท 3,NULL,True
+32,4,ท 3/หัวหน้า,NULL,True
+33,4,ท 4,NULL,True
+34,4,ท 4/หัวหน้า,NULL,True

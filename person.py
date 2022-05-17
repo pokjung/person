@@ -43,7 +43,7 @@ def main():
     officeData = getDataFromServer(driverName,hostName,databaseName,tableName,userName,passWord,orderBy)
 
     for indexPerson in range(len(personData)):
-        if personData[indexPerson][17] == 2:
+        if personData[indexPerson][17] == 2 or personData[indexPerson][17] == 4:
             personData[indexPerson][16] = False
 
     for indexPerson in range(len(personData)):

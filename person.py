@@ -4,14 +4,20 @@ import pyodbc as pyConnector
 import csv
 import pyodbc
 import log_process
-
+'''
 filePath = 'xls\\person.xlsx'
-#fileName = 'person.xlsx'
 driverName = 'ODBC Driver 17 for SQL Server'
 hostName = '192.168.7.150'
 userName =  'sa'
 passWord = 'mocbip@ssw0rd'
 databaseName = 'MOI_Personal'
+'''
+filePath = 'xls\\person.xlsx'
+driverName = 'ODBC Driver 17 for SQL Server'
+hostName = 'NOHEREEVIL\SQLEXPRESS'
+userName =  'sa'
+passWord = 't2907717'
+databaseName = 'ops_DB'
 
 '''
 PersonalProfile
@@ -113,6 +119,10 @@ def exportDataToCSV(exportData):
             exportToCSV.writerows(exportData)
     except Exception as e:
         print('Export Error >>',e)
+
+@log_process.logTime
+def updateDataToServer():
+    pass
 
 if __name__ == '__main__':
     print('<< Start >>')

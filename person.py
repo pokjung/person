@@ -1,3 +1,4 @@
+from fileinput import filename
 import pandas as pd
 import numpy as np
 import pyodbc as pyConnector
@@ -34,67 +35,73 @@ def main():
     
     tableName = 'PersonalProfile'
     orderBy = 'CitizenID'
-    personData = getDataFromServer(driverName,hostName,databaseName,tableName,userName,passWord,orderBy)
+    whereField = '[OrgID] = 9'
+    personData = getDataFromServer(driverName,hostName,databaseName,tableName,userName,passWord,orderBy,whereField)
     
     tableName = 'Position'
     orderBy = 'PositionThName'
-    positionData = getDataFromServer(driverName,hostName,databaseName,tableName,userName,passWord,orderBy)
+    whereField = ''
+    positionData = getDataFromServer(driverName,hostName,databaseName,tableName,userName,passWord,orderBy,whereField)
 
     tableName = 'PositionLevel'
     orderBy = 'PositionLevelThName'
-    positionLevelData = getDataFromServer(driverName,hostName,databaseName,tableName,userName,passWord,orderBy)
+    whereField = ''
+    positionLevelData = getDataFromServer(driverName,hostName,databaseName,tableName,userName,passWord,orderBy,whereField)
 
     tableName = 'Offices'
     orderBy = 'OfficeName'
-    officeData = getDataFromServer(driverName,hostName,databaseName,tableName,userName,passWord,orderBy)
+    whereField = ''
+    officeData = getDataFromServer(driverName,hostName,databaseName,tableName,userName,passWord,orderBy,whereField)
 
     for indexPerson in range(len(personData)):
-        if personData[indexPerson][17] == 2 or personData[indexPerson][17] == 4:
+        if personData[indexPerson][17] == 2:
             personData[indexPerson][16] = False
+
+    checkData = []
 
     for indexPerson in range(len(personData)):
         for indexExcel in range(len(dataFromExcel)):
-            #print(type(personData[indexPerson][1]),type(dataFromExcel[indexExcel][1]))
             if str(personData[indexPerson][1]) == str(dataFromExcel[indexExcel][1]):
-                #print(personData[indexPerson][1],dataFromExcel[indexExcel][1])
-                #print(personData[indexPerson][3],dataFromExcel[indexExcel][3])
                 for indexPosition in range(len(positionData)):
-                    if str(dataFromExcel[indexExcel][5]) == str(positionData[indexPosition][2]):
+                    if str(dataFromExcel[indexExcel][3]) == str(positionData[indexPosition][2]):
                         personData[indexPerson][13] = positionData[indexPosition][0]
-                        #print(str(dataFromExcel[indexExcel][5]),str(positionData[indexPosition][2]))
                         break
                 
                 for indexPositionLevel in range(len(positionLevelData)):
-                    if str(dataFromExcel[indexExcel][6]) == str(positionLevelData[indexPositionLevel][2]):
+                    if str(dataFromExcel[indexExcel][4]) == str(positionLevelData[indexPositionLevel][2]):
                         personData[indexPerson][14] = positionLevelData[indexPositionLevel][0]
-                        #print(str(dataFromExcel[indexExcel][6]),str(positionLevelData[indexPositionLevel][2]))
                         break
                 
                 for indexOffice in range(len(officeData)):
-                    if str(dataFromExcel[indexExcel][7]) == str(officeData[indexOffice][2]):
+                    if str(dataFromExcel[indexExcel][5]) == str(officeData[indexOffice][2]):
                         personData[indexPerson][8] = officeData[indexOffice][0]
-                        #print(str(dataFromExcel[indexExcel][7]),str(officeData[indexOffice][2]))
                         break
                 
                 personData[indexPerson][16] = True
-                
-
-    exportDataToCSV(personData)
+                checkData.append(str(dataFromExcel[indexExcel][1]))
+    '''
+    for indexRow in range(len(dataFromExcel)):
+        for indexCheck in checkData:
+            #print(str(dataFromExcel[indexRow][1]),str(indexCheck))
+            if str(dataFromExcel[indexRow][1]) == str(indexCheck):
+                dataFromExcel[indexRow][0] = 1
+                #print(str(dataFromExcel[indexRow][1]),str(indexCheck))
+                break
+    '''
     
-    #for indexData in personData:
-        #print(indexData[0],indexData[1],indexData[3],indexData[4],indexData[8],indexData[13],indexData[14],indexData[16])
-    
-
-    #print(len(dataFromExcel))
-    #print(dataFromExcel)
+    #exportDataToCSV('excel.csv',dataFromExcel)
+    exportDataToCSV('export.csv',personData)
 
 
 @log_process.logTime
-def getDataFromServer(driverName,hostName,databaseName,tableName,userName,passWord,orderBy):
+def getDataFromServer(driverName,hostName,databaseName,tableName,userName,passWord,orderBy,whereField):
     try:
         serverDetail = pyConnector.connect('DRIVER={'+str(driverName)+'};SERVER='+str(hostName)+';DATABASE='+str(databaseName)+';UID='+str(userName)+';PWD='+str(passWord))
         connectServer = serverDetail.cursor()
-        sqlScript = "SELECT * FROM "+str(tableName)+" ORDER BY "+orderBy+" asc"
+        if whereField:
+            sqlScript = "SELECT * FROM "+str(tableName)+" WHERE "+whereField+" ORDER BY "+orderBy+" asc"
+        else:
+            sqlScript = "SELECT * FROM "+str(tableName)+" ORDER BY "+orderBy+" asc"
         sqlData = serverDetail.execute(sqlScript).fetchall()
         connectServer.commit()
         connectServer.close()
@@ -112,9 +119,9 @@ def getDataFromXlsx(filePath):
         print('Get Data Failure >>',e)
 
 @log_process.logTime
-def exportDataToCSV(exportData):
+def exportDataToCSV(fileName,exportData):
     try:
-        with open('xls\\export.csv',mode='w',encoding='UTF8',newline='') as fileNameCSV:
+        with open('xls\\'+fileName,mode='w',encoding='UTF8',newline='') as fileNameCSV:
             exportToCSV = csv.writer(fileNameCSV)
             exportToCSV.writerows(exportData)
     except Exception as e:

@@ -5,7 +5,7 @@ import pyodbc as pyConnector
 import csv
 import pyodbc
 import log_process
-'''
+
 filePath = 'xls\\person.xlsx'
 driverName = 'ODBC Driver 17 for SQL Server'
 hostName = '192.168.7.150'
@@ -19,7 +19,7 @@ hostName = 'NOHEREEVIL\SQLEXPRESS'
 userName =  'sa'
 passWord = 't2907717'
 databaseName = 'ops_DB'
-
+'''
 '''
 PersonalProfile
 Position
@@ -28,6 +28,8 @@ Offices
 Provinces
 '''
 
+checkError = []
+
 @log_process.logTime
 def main():
 
@@ -35,7 +37,7 @@ def main():
     
     tableName = 'PersonalProfile'
     orderBy = 'CitizenID'
-    whereField = '[OrgID] = 9'
+    whereField = '[OrgID] = 9 and [GroupID] = 2'
     personData = getDataFromServer(driverName,hostName,databaseName,tableName,userName,passWord,orderBy,whereField)
     
     tableName = 'Position'
@@ -55,9 +57,14 @@ def main():
 
     for indexPerson in range(len(personData)):
         if personData[indexPerson][17] == 2:
-            personData[indexPerson][16] = False
+            personData[indexPerson][16] = 0
+            if not personData[indexPerson][13]:
+                personData[indexPerson][13] = 0
+            
+            if not personData[indexPerson][14]:
+                personData[indexPerson][14] = 0
 
-    checkData = []
+    #checkData = []
 
     for indexPerson in range(len(personData)):
         for indexExcel in range(len(dataFromExcel)):
@@ -77,21 +84,16 @@ def main():
                         personData[indexPerson][8] = officeData[indexOffice][0]
                         break
                 
-                personData[indexPerson][16] = True
-                checkData.append(str(dataFromExcel[indexExcel][1]))
-    '''
-    for indexRow in range(len(dataFromExcel)):
-        for indexCheck in checkData:
-            #print(str(dataFromExcel[indexRow][1]),str(indexCheck))
-            if str(dataFromExcel[indexRow][1]) == str(indexCheck):
-                dataFromExcel[indexRow][0] = 1
-                #print(str(dataFromExcel[indexRow][1]),str(indexCheck))
-                break
-    '''
+                personData[indexPerson][16] = 1
+                #checkData.append(str(dataFromExcel[indexExcel][1]))
+   
     
-    #exportDataToCSV('excel.csv',dataFromExcel)
-    exportDataToCSV('export.csv',personData)
-
+    #exportDataToCSV('export.csv',personData)
+    
+    for indexData in range(len(personData)):
+        updateDataToServer(driverName,hostName,databaseName,userName,passWord,personData[indexData][8],personData[indexData][13],personData[indexData][14],personData[indexData][16],personData[indexData][1])
+    
+    exportDataToCSV('excel.csv',checkError)
 
 @log_process.logTime
 def getDataFromServer(driverName,hostName,databaseName,tableName,userName,passWord,orderBy,whereField):
@@ -110,6 +112,21 @@ def getDataFromServer(driverName,hostName,databaseName,tableName,userName,passWo
         print('Get Data Failure >>',e)
 
 @log_process.logTime
+def updateDataToServer(driverName,hostName,databaseName,userName,passWord,officeID,positionID,positionLevelID,statusID,CitizenID):
+    try:
+        serverDetail = pyConnector.connect('DRIVER={'+str(driverName)+'};SERVER='+str(hostName)+';DATABASE='+str(databaseName)+';UID='+str(userName)+';PWD='+str(passWord))
+        connectServer = serverDetail.cursor()
+        sqlScript = "UPDATE [PersonalProfile] SET [OfficeID] = "+str(officeID)+", [PositionID] = "+str(positionID)+", [PositionLevelID] = "+str(positionLevelID)+", [Status] = "+str(statusID)+" WHERE [CitizenID] = "+str(CitizenID)
+        #print(sqlScript)
+        serverDetail.execute(sqlScript)
+        connectServer.commit()
+        connectServer.close()
+        #return sqlData
+    except Exception as e:
+        print('Get Data Failure >>',e)
+        checkError.append(CitizenID)
+
+@log_process.logTime
 def getDataFromXlsx(filePath):
     try:
         dataFrame = pd.read_excel(filePath)
@@ -126,10 +143,6 @@ def exportDataToCSV(fileName,exportData):
             exportToCSV.writerows(exportData)
     except Exception as e:
         print('Export Error >>',e)
-
-@log_process.logTime
-def updateDataToServer():
-    pass
 
 if __name__ == '__main__':
     print('<< Start >>')
